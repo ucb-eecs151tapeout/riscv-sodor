@@ -21,3 +21,4 @@ install/share
 sbt/*/target
 */target
 *.log
+project/

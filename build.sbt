@@ -1,11 +1,11 @@
-val chiselVersion = System.getProperty("chiselVersion", "latest.release")
-val defaultVersions = Map("chisel3" -> "latest.release",
-                          "chisel-iotesters" -> "latest.release")
+val chiselVersion = System.getProperty("chiselVersion", "3.3.2")
+val defaultVersions = Map("chisel3" -> "3.3.2",
+                          "chisel-iotesters" -> "1.4.2")
 
 lazy val commonSettings = Seq (
   organization := "berkeley",
   version      := "3.0",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.5",
   traceLevel   := 15,
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
   resolvers ++= Seq(
