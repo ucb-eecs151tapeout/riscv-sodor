@@ -128,6 +128,7 @@ class DatPath(implicit val conf: SodorConfiguration) extends Module
    // Instruction Memory
    io.imem.req.bits.addr := if_reg_pc
    val if_inst = io.imem.resp.bits.data
+   val if_pc_resp = RegNext(if_reg_pc)
 
    when (xcpt)
    {
@@ -144,7 +145,7 @@ class DatPath(implicit val conf: SodorConfiguration) extends Module
          dec_reg_inst := if_inst
       }
 
-      dec_reg_pc := if_reg_pc
+      dec_reg_pc := if_pc_resp
    }
 
 
@@ -361,8 +362,8 @@ class DatPath(implicit val conf: SodorConfiguration) extends Module
    val ma_jump         = Wire(Bool())
    val ls_addr_ma_valid  = MuxLookup(mem_reg_ctrl_mem_typ(1,0) ,false.B, Array( 2.U -> mem_reg_alu_out(0), 3.U -> mem_reg_alu_out(1,0).orR ))
    ma_jump      := jump_npc(1,0).orR
-   ma_load      := !mem_reg_ctrl_mem_fcn.toBool && mem_reg_ctrl_mem_val && ls_addr_ma_valid
-   ma_str       := mem_reg_ctrl_mem_fcn.toBool && mem_reg_ctrl_mem_val && ls_addr_ma_valid
+   ma_load      := !mem_reg_ctrl_mem_fcn.asBool && mem_reg_ctrl_mem_val && ls_addr_ma_valid
+   ma_str       := mem_reg_ctrl_mem_fcn.asBool && mem_reg_ctrl_mem_val && ls_addr_ma_valid
    csr.io.xcpt  := ma_load || ma_str || ma_jump || io.ctl.mem_illegal
    csr.io.cause := MuxCase(0.U, Array(
                      ma_jump -> Causes.misaligned_fetch.U,

@@ -1,6 +1,7 @@
 package Sodor
 
 import chisel3._
+import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 import Common.{SodorConfiguration, SimDTM}
 
@@ -13,11 +14,11 @@ class Top extends Module
    implicit val sodor_conf = SodorConfiguration()
 
    val tile = Module(new SodorTile)
-   val dtm = Module(new SimDTM).connect(clock, reset.toBool, tile.io.dmi, io.success)
+   val dtm = Module(new SimDTM).connect(clock, reset.asBool, tile.io.dmi, io.success)
 }
 
 object elaborate {
   def main(args: Array[String]): Unit = {
-    chisel3.Driver.execute(args, () => new Top)
+    (new ChiselStage).execute(args, Seq(ChiselGeneratorAnnotation(() => new Top)))
   }
 }

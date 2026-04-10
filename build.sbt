@@ -1,11 +1,12 @@
-val chiselVersion = System.getProperty("chiselVersion", "3.3.2")
-val defaultVersions = Map("chisel3" -> "3.3.2",
-                          "chisel-iotesters" -> "1.4.2")
+val chiselVersion = System.getProperty("chiselVersion", "3.5.6")
+val firrtlVersion = System.getProperty("firrtlVersion", "1.5.6")
+val defaultVersions = Map("chisel3" -> "3.5.6",
+                          "chisel-iotesters" -> "2.5.6")
 
 lazy val commonSettings = Seq (
   organization := "berkeley",
   version      := "3.0",
-  scalaVersion := "2.12.5",
+  scalaVersion := "2.12.16",
   traceLevel   := 15,
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
   resolvers ++= Seq(
@@ -13,7 +14,11 @@ lazy val commonSettings = Seq (
     "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases"
   ),
   libraryDependencies ++= (Seq("chisel3","chisel-iotesters").map {
-    dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) })
+    dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) }) ++
+  Seq(
+    "edu.berkeley.cs" %% "firrtl" % firrtlVersion
+  ),
+  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin_2.12.16" % chiselVersion)
 )  
 
 lazy val common = Project("common", file("common")).settings(commonSettings
@@ -30,4 +35,3 @@ lazy val rv32_5stage = Project("rv32_5stage", file("rv32_5stage")).settings(comm
   ++Seq(scalaSource in Compile := baseDirectory.value / "../src/rv32_5stage")).dependsOn(common)
 lazy val rv32_ucode  = Project("rv32_ucode", file("rv32_ucode")).settings(commonSettings  
   ++Seq(scalaSource in Compile := baseDirectory.value / "../src/rv32_ucode")).dependsOn(common)
-

@@ -51,6 +51,7 @@ class SodorTile(implicit val conf: SodorConfiguration) extends Module
 
    // DTM memory access
    debug.io.debugmem <> memory.io.debug_port
+   memory.io.reset_core := debug.io.resetcore
    debug.io.dmi <> io.dmi
 }
  

@@ -24,8 +24,9 @@ class SodorTile(implicit val conf: SodorConfiguration) extends Module
    core.io.dmem <> memory.io.core_ports(0)
    core.io.imem <> memory.io.core_ports(1)
    debug.io.debugmem <> memory.io.debug_port
+   memory.io.reset_core := debug.io.resetcore
 
-   core.reset := debug.io.resetcore | reset.toBool
+   core.reset := debug.io.resetcore | reset.asBool
    debug.io.dmi <> io.dmi
 }
  

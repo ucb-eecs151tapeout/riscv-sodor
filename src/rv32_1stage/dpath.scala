@@ -52,19 +52,23 @@ class DatPath(implicit conf: SodorConfiguration) extends Module
                   (io.ctl.pc_sel === PC_JR)  -> jump_reg_target
                   ))
 
-   val pc_reg = RegInit(START_ADDR) 
+   val pc_reg = RegInit(START_ADDR)
+   val inst_reg = RegInit(BUBBLE)
+   val pc_inst = RegInit(START_ADDR)
 
    when (!io.ctl.stall) 
    {
       pc_reg := Mux(xcpt, exception_target, pc_next)
+      inst_reg := io.imem.resp.bits.data
+      pc_inst := RegNext(pc_reg)
    }
 
-   pc_plus4 := (pc_reg + 4.asUInt(conf.xprlen.W))               
+   pc_plus4 := (pc_inst + 4.asUInt(conf.xprlen.W))
 
    
    io.imem.req.bits.addr := pc_reg
    io.imem.req.valid := true.B 
-   val inst = Mux(io.imem.resp.valid, io.imem.resp.bits.data, BUBBLE) 
+   val inst = inst_reg
                  
    
    // Decode
@@ -109,7 +113,7 @@ class DatPath(implicit conf: SodorConfiguration) extends Module
 
    val alu_op2 = MuxCase(0.U, Array(
                (io.ctl.op2_sel === OP2_RS2) -> rs2_data,
-               (io.ctl.op2_sel === OP2_PC)  -> pc_reg,
+               (io.ctl.op2_sel === OP2_PC)  -> pc_inst,
                (io.ctl.op2_sel === OP2_IMI) -> imm_i_sext,
                (io.ctl.op2_sel === OP2_IMS) -> imm_s_sext
                )).asUInt
@@ -134,8 +138,8 @@ class DatPath(implicit conf: SodorConfiguration) extends Module
                   ))
 
    // Branch/Jump Target Calculation
-   br_target       := pc_reg + imm_b_sext
-   jmp_target      := pc_reg + imm_j_sext
+   br_target       := pc_inst + imm_b_sext
+   jmp_target      := pc_inst + imm_j_sext
    jump_reg_target := Cat(alu_out(31,1), 0.U(1.W)) 
 
    // Control Status Registers
@@ -147,7 +151,7 @@ class DatPath(implicit conf: SodorConfiguration) extends Module
 
    csr.io.retire    := !io.ctl.stall
    csr.io.illegal   := io.ctl.illegal 
-   csr.io.pc        := pc_reg
+   csr.io.pc        := pc_inst
    exception_target := csr.io.evec
 
    // Add your own uarch counters here!

@@ -71,6 +71,8 @@ class DatPath(implicit conf: SodorConfiguration) extends Module
    //Instruction Memory
    io.imem.req.bits.addr := if_reg_pc
    val if_inst = io.imem.resp.bits.data
+   val if_pc_resp = RegNext(if_reg_pc)
+   val if_pc_plus4_resp = RegNext(if_pc_plus4)
                  
    when(io.ctl.stall) 
    {
@@ -85,10 +87,10 @@ class DatPath(implicit conf: SodorConfiguration) extends Module
    .otherwise 
    {
       exe_reg_inst := if_inst
-      exe_reg_pc   := if_reg_pc
+      exe_reg_pc   := if_pc_resp
    }
 
-   exe_reg_pc_plus4 := if_pc_plus4
+   exe_reg_pc_plus4 := if_pc_plus4_resp
    
    //**********************************
    // Execute Stage
