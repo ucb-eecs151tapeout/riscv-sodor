@@ -8,11 +8,11 @@ package Sodor
 
 import chisel3._
 
-import Common.{SodorConfiguration, DMIIO, AsyncScratchPadMemory, DebugModule, DebugMemArbiter}
+import Common.{SodorConfiguration, DMIIO, AsyncScratchPadMemory, DebugModule, DebugMemArbiter, SodorSerialTLFrontend}
 
 class SodorTile(implicit val conf: SodorConfiguration) extends Module
 {
-   // connected here needs to change
+
    val io = IO(new Bundle {
       val dmi = Flipped(new DMIIO())
    })
@@ -32,12 +32,14 @@ class SodorTile(implicit val conf: SodorConfiguration) extends Module
    
    val debugMemArb = Module(new DebugMemArbiter())
 
+   // Placeholder SerialTL frontend for future integration.
+   val serialTL = Module(new SodorSerialTLFrontend())
+
    debugMemArb.io.debug <> debug.io.debugmem
+
+   debugMemArb.io.serial <> serialTL.io.mem
+
    debugMemArb.io.mem <> memory.io.debug_port
-
-
-   debugMemArb.io.serial.req.valid := false.B
-   debugMemArb.io.serial.req.bits := DontCare
 
 
    core.reset := debug.io.resetcore | reset.toBool
